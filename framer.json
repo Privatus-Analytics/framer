@@ -1,0 +1,6 @@
+{
+  "id": "privatus-analytics",
+  "name": "Privatus Analytics",
+  "modes": ["canvas"],
+  "icon": "/icon.svg"
+}

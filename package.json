@@ -1,0 +1,31 @@
+{
+  "name": "privatus-analytics-framer-plugin",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "preview": "vite preview",
+    "pack": "npm run build && npx framer-plugin-tools@1.2.2 pack"
+  },
+  "dependencies": {
+    "@framer/plugin": "5.1.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "6.1.2",
+    "typescript": "5.9.3",
+    "vite": "8.3.2",
+    "vite-plugin-framer": "1.1.1",
+    "vite-plugin-mkcert": "1.17.12",
+    "vitest": "5.0.3"
+  }
+}

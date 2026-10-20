@@ -1,0 +1,19 @@
+main { display: flex; flex-direction: column; gap: 12px; padding: 0 15px 15px; height: 100%; overflow-y: auto; }
+header { display: flex; gap: 10px; align-items: center; }
+header img { border-radius: 7px; }
+h1 { font-size: 13px; font-weight: 600; }
+.sub { color: var(--framer-color-text-tertiary); }
+.status { padding: 8px 10px; border-radius: 8px; background: var(--framer-color-bg-secondary); }
+.status.ok { background: var(--framer-color-tint-dimmed); color: var(--framer-color-tint); }
+.status.warn { background: rgba(255, 170, 0, 0.15); }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field input[type="text"] { width: 100%; }
+.hint, footer { color: var(--framer-color-text-tertiary); font-weight: 400; }
+.error { color: #e5484d; }
+.note { color: var(--framer-color-text-secondary); }
+fieldset { border: 0; display: flex; flex-direction: column; gap: 6px; }
+legend { margin-bottom: 6px; color: var(--framer-color-text-secondary); }
+.check { display: flex; gap: 8px; align-items: center; font-weight: 400; }
+.actions { display: flex; gap: 8px; }
+.actions button { flex: 1; }
+a { color: var(--framer-color-tint); }
