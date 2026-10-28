@@ -7,9 +7,10 @@ cookies, so in many countries you must show a cookie pop-up first (the box that
 asks visitors to say yes to cookies). Many people click no, so they never show
 up in your numbers. Bots add fake visits on top.
 
-This Framer plugin adds the Privatus Analytics script to your published Framer
-site. Paste your site id, pick what to count, and click Install. The script sets
-no cookies and keeps no IP addresses. Bots are filtered out before they are
+This Framer plugin builds your Privatus Analytics snippet. Paste your site ID,
+pick what to count, and click Copy snippet. Then paste it in Site Settings,
+Custom Code, and publish. The plugin does not change your project or send any
+data. The script sets no cookies and keeps no IP addresses. Bots are filtered out before they are
 counted.
 
 So you see how many real people came, which pages they looked at and where they
@@ -27,12 +28,14 @@ pop-up for your analytics.
 
 ## About this repo
 
-A client-only Framer plugin. It adds the Privatus Analytics tracker tag to the
-end of the `<head>` of a published Framer site with `framer.setCustomCode`.
-There is no backend and no account connection. The user pastes a site ID
-(`pa_...`), picks which modules to load, and clicks Install.
+A client-only Framer plugin. It builds the Privatus Analytics tracker tag and
+copies it to the clipboard. It never calls `framer.setCustomCode`, never
+changes the project and makes no network requests. The user pastes the tag in
+Site Settings, General, Custom Code ("End of <head> tag") themselves. This
+follows Framer's Marketplace review (2026-10-28): a plugin may not add a
+script that sends visitor data outside Framer.
 
-The tag it installs (one per site, `headEnd`):
+The tag it builds:
 
 ```html
 <script defer src="https://privatusstats.com/js/pa.js" data-site="pa_YOURSITEID" data-modules="engage,auto,vitals,clicks,ask"></script>
@@ -54,6 +57,6 @@ npm run pack       # build + plugin.zip for the Marketplace (framer-plugin-tools
 ## Files
 
 - `src/tracker.ts` pure helpers (build, parse, validate), unit tested
-- `src/App.tsx` the plugin window (320 x 460), live state from `framer.subscribeToCustomCode`
+- `src/App.tsx` the plugin window (320 x 560), snippet builder with a copy button and paste steps
 - `framer.json` plugin manifest, `public/icon.svg` icon, `assets/` PNG icons
 - `SUBMISSION.md` listing copy and the steps only a person can do

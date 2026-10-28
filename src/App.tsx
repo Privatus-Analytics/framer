@@ -1,96 +1,44 @@
-import { framer, useIsAllowedTo, type CustomCode } from "@framer/plugin"
-import { useEffect, useState } from "react"
+import { framer } from "@framer/plugin"
+import { useRef, useState } from "react"
 import "./App.css"
-import {
-    buildSnippet,
-    DEFAULT_MODULES,
-    MODULES,
-    parseSnippet,
-    validateSiteId,
-    type ModuleId,
-} from "./tracker.ts"
+import { buildSnippet, DEFAULT_MODULES, MODULES, validateSiteId, type ModuleId } from "./tracker.ts"
 
-const LOCATION = "headEnd" as const
 const DOCS_URL = "https://privatusanalytics.com/docs/install/framer"
 const SIGNUP_URL = "https://privatusanalytics.com/users/sign_up?ref=framer"
 
-void framer.showUI({ position: "top right", width: 320, height: 460 })
+void framer.showUI({ position: "top right", width: 320, height: 560 })
 
-function useCustomCode(): CustomCode | null {
-    const [code, setCode] = useState<CustomCode | null>(null)
-    useEffect(() => framer.subscribeToCustomCode(setCode), [])
-    return code
-}
-
+// This plugin never changes the project and never sends anything anywhere.
+// It builds the tag, copies it, and shows where to paste it in Site Settings.
 export function App() {
-    const customCode = useCustomCode()
-    const allowed = useIsAllowedTo("setCustomCode")
-    const slot = customCode?.[LOCATION]
-    const installed = parseSnippet(slot?.html)
-    const disabledByUser = Boolean(slot?.disabled)
-
     const [siteId, setSiteId] = useState("")
     const [modules, setModules] = useState<ModuleId[]>(DEFAULT_MODULES)
     const [touched, setTouched] = useState(false)
-    const [busy, setBusy] = useState(false)
-    const [message, setMessage] = useState<string | null>(null)
-    const [loaded, setLoaded] = useState(false)
-
-    // Fill the form from what is already installed, once.
-    useEffect(() => {
-        if (customCode && !loaded) {
-            setLoaded(true)
-            if (installed) {
-                setSiteId(installed.siteId)
-                setModules(installed.modules)
-            }
-        }
-    }, [customCode, loaded, installed])
+    const [copied, setCopied] = useState(false)
+    const snippetRef = useRef<HTMLTextAreaElement>(null)
 
     const error = validateSiteId(siteId)
     const showError = touched && error
+    const snippet = error ? "" : buildSnippet({ siteId, modules })
 
-    const toggle = (id: ModuleId) =>
+    const toggle = (id: ModuleId) => {
+        setCopied(false)
         setModules(current => (current.includes(id) ? current.filter(m => m !== id) : [...current, id]))
+    }
 
-    async function save() {
+    async function copy() {
         setTouched(true)
         if (error) return
-        setBusy(true)
-        setMessage(null)
         try {
-            await framer.setCustomCode({ html: buildSnippet({ siteId, modules }), location: LOCATION })
-            setMessage("Saved. Publish your site to start counting visits.")
-        } catch (e) {
-            setMessage(e instanceof Error ? e.message : "Could not save. Try again.")
-        } finally {
-            setBusy(false)
+            await navigator.clipboard.writeText(snippet)
+        } catch {
+            // Clipboard can be blocked inside the plugin window: select the text so Cmd+C works.
+            snippetRef.current?.select()
+            document.execCommand("copy")
         }
+        setCopied(true)
+        framer.notify("Snippet copied. Paste it in Site Settings, Custom Code.", { variant: "success" })
     }
-
-    async function remove() {
-        setBusy(true)
-        setMessage(null)
-        try {
-            await framer.setCustomCode({ html: null, location: LOCATION })
-            setMessage("Removed. Publish your site to stop counting visits.")
-        } catch (e) {
-            setMessage(e instanceof Error ? e.message : "Could not remove. Try again.")
-        } finally {
-            setBusy(false)
-        }
-    }
-
-    const status = !customCode
-        ? { tone: "muted", text: "Checking..." }
-        : disabledByUser
-          ? {
-                tone: "warn",
-                text: "Plugin custom code is turned off in your site settings. Turn it back on under Site Settings, General, Plugin custom code. A plugin cannot do this for you.",
-            }
-          : installed
-            ? { tone: "ok", text: `Installed for ${installed.siteId}. Publish to apply changes.` }
-            : { tone: "muted", text: "Not installed yet." }
 
     return (
         <main>
@@ -102,10 +50,6 @@ export function App() {
                 </div>
             </header>
 
-            <div className={`status ${status.tone}`} role="status">
-                {status.text}
-            </div>
-
             <label className="field">
                 <span>Site ID</span>
                 <input
@@ -114,7 +58,10 @@ export function App() {
                     value={siteId}
                     spellCheck={false}
                     autoComplete="off"
-                    onChange={e => setSiteId(e.target.value)}
+                    onChange={e => {
+                        setCopied(false)
+                        setSiteId(e.target.value)
+                    }}
                     onBlur={() => setTouched(true)}
                     aria-invalid={Boolean(showError)}
                 />
@@ -137,23 +84,29 @@ export function App() {
                 ))}
             </fieldset>
 
-            <div className="actions">
-                <button className="framer-button-primary" onClick={save} disabled={busy || !allowed}>
-                    {installed ? "Update" : "Install"}
-                </button>
-                {installed ? (
-                    <button onClick={remove} disabled={busy || !allowed}>
-                        Remove
-                    </button>
-                ) : null}
-            </div>
+            <textarea
+                ref={snippetRef}
+                className="snippet"
+                readOnly
+                rows={4}
+                value={snippet}
+                placeholder="Your snippet shows here once the site ID is right."
+                aria-label="Snippet"
+            />
 
-            {!allowed ? <small className="error">You do not have permission to edit custom code in this project.</small> : null}
-            {message ? <small className="note">{message}</small> : null}
+            <button className="framer-button-primary" onClick={copy}>
+                {copied ? "Copied" : "Copy snippet"}
+            </button>
+
+            <ol className="steps">
+                <li>Open Site Settings, then General.</li>
+                <li>Under Custom Code, paste the snippet in "End of &lt;head&gt; tag".</li>
+                <li>Save, then publish your site.</li>
+            </ol>
 
             <footer>
-                Framer custom code needs a paid site plan. Your framer.app preview domain is not counted unless you
-                add it to your site's domains. Only the Privatus Analytics tracker tag is added, to the end of the head.{" "}
+                This plugin does not change your project or send any data. You paste the snippet yourself. Framer custom
+                code needs a paid site plan.{" "}
                 <a href={DOCS_URL} target="_blank" rel="noreferrer">
                     Setup guide
                 </a>

@@ -17,3 +17,5 @@ legend { margin-bottom: 6px; color: var(--framer-color-text-secondary); }
 .actions { display: flex; gap: 8px; }
 .actions button { flex: 1; }
 a { color: var(--framer-color-tint); }
+.snippet { width: 100%; resize: none; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; padding: 8px; border-radius: 8px; background: var(--framer-color-bg-secondary); color: var(--framer-color-text); border: 0; }
+.steps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; color: var(--framer-color-text-secondary); font-weight: 400; }
