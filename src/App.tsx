@@ -105,8 +105,10 @@ export function App() {
             </ol>
 
             <footer>
-                This plugin does not change your project or send any data. You paste the snippet yourself. Framer custom
-                code needs a paid site plan.{" "}
+                This plugin does not change your project or send any data. You paste the snippet yourself. The snippet
+                loads the Privatus Analytics script from privatusstats.com each time a page opens, so updates to the
+                script reach your site without a new publish. Remove the snippet to stop it. Framer custom code needs a
+                paid site plan.{" "}
                 <a href={DOCS_URL} target="_blank" rel="noreferrer">
                     Setup guide
                 </a>

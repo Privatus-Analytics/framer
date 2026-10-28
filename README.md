@@ -35,6 +35,10 @@ Site Settings, General, Custom Code ("End of <head> tag") themselves. This
 follows Framer's Marketplace review (2026-10-28): a plugin may not add a
 script that sends visitor data outside Framer.
 
+The snippet loads the tracker from privatusstats.com when a page opens, so the
+tracker can change without a new Framer publish. The plugin window says so.
+There is no versioned copy of the tracker to pin to.
+
 The tag it builds:
 
 ```html
