@@ -15,6 +15,7 @@ export function App() {
     const [modules, setModules] = useState<ModuleId[]>(DEFAULT_MODULES)
     const [touched, setTouched] = useState(false)
     const [copied, setCopied] = useState(false)
+    const [copyFailed, setCopyFailed] = useState(false)
     const snippetRef = useRef<HTMLTextAreaElement>(null)
 
     const error = validateSiteId(siteId)
@@ -29,15 +30,20 @@ export function App() {
     async function copy() {
         setTouched(true)
         if (error) return
-        try {
-            await navigator.clipboard.writeText(snippet)
-        } catch {
-            // Clipboard can be blocked inside the plugin window: select the text so Cmd+C works.
-            snippetRef.current?.select()
-            document.execCommand("copy")
+        setCopyFailed(false)
+        if (navigator.clipboard?.writeText) {
+            try {
+                await navigator.clipboard.writeText(snippet)
+                setCopied(true)
+                framer.notify("Snippet copied. Paste it in Site Settings, Custom Code.", { variant: "success" })
+                return
+            } catch {
+                // Blocked in this window. Fall through to manual copy.
+            }
         }
-        setCopied(true)
-        framer.notify("Snippet copied. Paste it in Site Settings, Custom Code.", { variant: "success" })
+        snippetRef.current?.focus()
+        snippetRef.current?.select()
+        setCopyFailed(true)
     }
 
     return (
@@ -97,6 +103,11 @@ export function App() {
             <button className="framer-button-primary" onClick={copy}>
                 {copied ? "Copied" : "Copy snippet"}
             </button>
+            {copyFailed ? (
+                <small className="error" role="alert">
+                    Copying is blocked here. The snippet is selected: press Cmd+C (Ctrl+C on Windows) to copy it.
+                </small>
+            ) : null}
 
             <ol className="steps">
                 <li>Open Site Settings, then General.</li>
@@ -106,8 +117,9 @@ export function App() {
 
             <footer>
                 This plugin does not change your project or send any data. You paste the snippet yourself. The snippet
-                loads the Privatus Analytics script from privatusstats.com each time a page opens, so updates to the
-                script reach your site without a new publish. Remove the snippet to stop it. Framer custom code needs a
+                loads the Privatus Analytics script from privatusstats.com each time a page opens. It is not version
+                pinned: fixes reach your site without a new publish, and the script only counts visits (no cookies, no
+                IP addresses kept). Remove the snippet to stop it. Framer custom code needs a
                 paid site plan.{" "}
                 <a href={DOCS_URL} target="_blank" rel="noreferrer">
                     Setup guide
